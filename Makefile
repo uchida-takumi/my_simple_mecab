@@ -7,11 +7,11 @@ docker-build:
 	docker build -t hogefuga:latest .
 
 docker-run-echo:
-	docker run -d --rm -v $(THIS_DIR):$(DOCKER_DIR) \
+	docker run --rm -v $(THIS_DIR):$(DOCKER_DIR) \
 		hogefuga:latest \
 		echo "Docker run from a Makefile operation."
 
 docker-run-bash:
-	docker run -it -d --rm -v $(THIS_DIR):/docker-work \
+	docker run -it --rm -v $(THIS_DIR):$(DOCKER_DIR) \
 		hogefuga:latest \
 		/bin/bash
