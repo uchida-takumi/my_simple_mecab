@@ -1,5 +1,5 @@
-# simple_python_docker_app
-This is a simple python Dockerfile and utilities for my use.
+# my_docker_mecab
+This is a simple python Dockerfile having mecab on python.
 
 # usage
 
@@ -7,8 +7,8 @@ This is a simple python Dockerfile and utilities for my use.
 # build
 make docker-build
 
-# run echo
-make docker-run-echo
+# run example
+make docker-run-example
 
 # run docker image and login to the container on the bash.
 make docker-run-bash
