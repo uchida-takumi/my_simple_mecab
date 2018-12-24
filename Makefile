@@ -6,7 +6,7 @@ DOCKER_DIR='/docker_work'
 docker-build:
 	docker build -t hogefuga:latest .
 
-docker-run:
+docker-run-example:
 	docker run --rm -v $(THIS_DIR):$(DOCKER_DIR) \
 		hogefuga:latest \
 		python3 example.py

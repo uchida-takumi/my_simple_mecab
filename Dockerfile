@@ -47,10 +47,8 @@ ENV LD_LIBRARY_PATH "/usr/local/lib:$LD_LIBRARY_PATH"
 # set working directory
 WORKDIR /docker_work
 
-
 # add all file to docker
 ADD . .
-
 
 # exec command
 CMD [ "python", "example.py" ]
