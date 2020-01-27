@@ -3,10 +3,11 @@
 MeCabを使った形態素解析でテキストをベクトル化するやつです。
 """
 import MeCab
-import pandas as pd, numpy as np
+from collections import Counter
+
 
 class keitaiso:
-    def __init__(self, use_PoW=['名詞','動詞','形容詞','副詞',], stop_words=[], use_words=[], user_dic_files=[]):
+    def __init__(self, use_PoW=['名詞','動詞','形容詞','副詞','記号'], stop_words=[], use_words=[], user_dic_files=[]):
         """
         ARGUMENT
         ----------------
@@ -14,7 +15,7 @@ class keitaiso:
             .tokenize(text) で出力される品詞を指定する。
             ex) use_PoW=['名詞','動詞'] なら名詞と動詞しか出力しない。
         stop_words [list]:
-            .tokenize(text) で出力しない単語を指定する。
+            .tokenize(text) で出力しない単語を指定する。∂
         use_words [list]:
             .tokenize(text) で出力する単語の集合を指定する。
             defaultは空リスト([])であり、この場合は全ての単語が出力される。
@@ -23,16 +24,17 @@ class keitaiso:
         
         EXAMPLE
         ----------------
-        text = "今日は何時に帰ってきますか？　と彼女は尋ねてくる"
-        use_PoW = ['名詞','動詞','形容詞','副詞','記号',]
+        text = "すももも桃も桃の内です"
+        use_PoW = ['名詞','動詞']
         stop_words = ['*','よう','上','の','様','こちら','際','ところ','はず','\u3000',]
     
         k = keitaiso(use_PoW=use_PoW,stop_words=stop_words)
         print(k.basic_tokenize(text))
-         > [[0, '名詞', '今日'], [1, '助詞', 'は'], [2, '名詞', '何'], [3, '名詞', '時'], [4, '助詞', 'に'], [5, '動詞', '帰る'], [6, '助詞', 'て'], [7, '動詞', 'くる'], [8, '助動詞', 'ます'], [9, '助詞', 'か'], [10, '記号', '？'], [11, '記号', '\u3000'], [12, '助詞', 'と'], [13, '名詞', '彼女'], [14, '助詞', 'は'], [15, '動詞', '尋ねる'], [16, '助詞', 'て'], [17, '動詞', 'くる']]
+         > [[0, '名詞', 'すもも'], [1, '助詞', 'も'], [2, '名詞', '桃'], [3, '助詞', 'も'], [4, '名詞', '桃'], [5, '助詞', 'の'], [6, '名詞', '内'], [7, '助動詞', 'です']]
         print(k.tokenize(text))
-         > [0, '名詞', '今日'], [2, '名詞', '何'], [3, '名詞', '時'], [5, '動詞', '帰る'], [7, '動詞', 'くる'], [10, '記号', '？'], [13, '名詞', '彼女'], [15, '動詞', '尋ねる'], [17, '動詞', 'くる']]
-        
+         > [[0, '名詞', 'すもも'], [2, '名詞', '桃'], [4, '名詞', '桃'], [6, '名詞', '内']]        
+        print(k.tokenize_to_bag_of_words(text))
+         > {'すもも': 1, '桃': 2, '内': 1}
         """
         self.use_PoW = use_PoW
         self.stop_words = stop_words
@@ -44,14 +46,38 @@ class keitaiso:
         self.tagger = MeCab.Tagger(arg_user_dic_files)
 
     def tokenize(self, text):
+        """
+        text を形態素分解した結果を返却する
+        
+        ARGUMENT
+        ---------------
+        text [str]:
+            日本語の文章
+        """
         processing = self.basic_tokenize(text)
         processing = self.filter_PoW(processing)
         processing = self.filter_stop_words(processing)
         processing = self.filter_use_words(processing)
+            
         return processing
+    
+    def tokenize_to_bag_of_words(self, text):
+        """
+        text を形態素分解した結果を Bag of words で集計し、dictionary型として返却する。
+        
+        ARGUMENT
+        ---------------
+        text [str]:
+            日本語の文章
+        """
+        processing = self.tokenize(text)
+        processing = [p[2] for p in processing]
+        processing = Counter(processing)
+        return dict(processing)
+        
 
     def basic_tokenize(self, text):
-        if text is (np.nan or None):
+        if not isinstance(text, str):
             parsed = [[1,'*','*'],]
         else:
             parsed = self.tagger.parse(text).split('\n')[:-2]
@@ -70,11 +96,6 @@ class keitaiso:
             return basic_tokenized
         else:
             return [token for token in basic_tokenized if token[2] in self.use_words]
-
-    def get_X(self, text_array):
-        tokenized_array = [self.tokenize(text) for text in text_array]
-        dict_array = [self.change_dict(tokenized) for tokenized in tokenized_array]
-        return pd.DataFrame(dict_array).fillna(0)
 
     def change_dict(self, tokenized,):
         words_list = [token[2] for token in tokenized]
