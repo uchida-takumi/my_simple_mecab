@@ -35,6 +35,8 @@ class keitaiso:
          > [[0, '名詞', 'すもも'], [2, '名詞', '桃'], [4, '名詞', '桃'], [6, '名詞', '内']]        
         print(k.tokenize_to_bag_of_words(text))
          > {'すもも': 1, '桃': 2, '内': 1}
+        print(k.tokenize_to_wakachi(text))
+         > "すもも 桃 桃 内"
         """
         self.use_PoW = use_PoW
         self.stop_words = stop_words
@@ -74,7 +76,19 @@ class keitaiso:
         processing = [p[2] for p in processing]
         processing = Counter(processing)
         return dict(processing)
+    
+    def tokenize_to_wakachi(self, text):
+        """
+        text を形態素分解した結果を わかち書き 形式のstrとして返却する。
         
+        ARGUMENT
+        ---------------
+        text [str]:
+            日本語の文章
+        """
+        processing = self.tokenize(text)
+        processing = [p[2] for p in processing]
+        return ' '.join(processing)                        
 
     def basic_tokenize(self, text):
         if not isinstance(text, str):
